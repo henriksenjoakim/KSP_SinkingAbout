@@ -22,12 +22,14 @@ namespace sinkingabout
         public int commandModules = 0;
         public int shipAlarmModules = 0;
         public int armedModules = 0;
-        public bool criticalMode = false;
+        public bool takingOnWater = false;
         public bool delay = false;
-        public bool leaking = false;
+        public bool hasBreach = false;
         public bool commandModulePresent = false;
         public bool shipAlarmModulePresent = false;
         public bool isArmed = false;
+        public bool isCritical = false;
+        public int activeFlow = 0;
 
         public void checkForBreach()
         {
@@ -56,6 +58,11 @@ namespace sinkingabout
                         {
                             criticalBreach += 1;
                         }
+                        if (pp.takingOnWater)
+                        {
+                            activeFlow += 1;
+                        }
+                        
                     }
                     if (p.Modules.Contains("MissileFire"))
                     {
@@ -75,22 +82,31 @@ namespace sinkingabout
                 criticalBreach = 0;
                 activeBreach = 0;
                 armedModules = 0;
+                activeFlow = 0;
             }
             if (activeBreach > 0)
             {
-                leaking = true;
+                hasBreach = true;
             }
             else
             {
-                leaking = false;
+                hasBreach = false;
             }
             if (criticalBreach > 0)
             {
-                criticalMode = true;
+                isCritical = true;
             }
             else
             {
-                criticalMode = false;
+                isCritical = false;
+            }
+            if (activeFlow > 0)
+            {
+                takingOnWater = true;
+            }
+            else
+            {
+                takingOnWater = false;
             }
 
             if (commandModules > 0)
@@ -131,7 +147,7 @@ namespace sinkingabout
             if (!delay) return;
             else
             {
-                if (!leaking)
+                if (!hasBreach)
                 {
                     if (clearAudio != null)
                     {
@@ -175,7 +191,7 @@ namespace sinkingabout
 
         public void alarmHandler()
         {
-            if (leaking)
+            if (hasBreach)
             {
                 delay = true;
                 if (FlightGlobals.ActiveVessel.isEVA == false && commandModulePresent)
@@ -188,7 +204,7 @@ namespace sinkingabout
                             generalAlarm.Play();
                         }
                     }
-                    if (criticalMode)
+                    if (takingOnWater)
                     {
                         if (panicAlarm != null)
                         {
@@ -267,9 +283,17 @@ namespace sinkingabout
 
         public void onScreenMessages()
         {
-            if (leaking)
+            if (hasBreach)
             {
-                ScreenMessages.PostScreenMessage("Warning: Taking on SeaWater!", 5.0f, ScreenMessageStyle.UPPER_CENTER);
+                ScreenMessages.PostScreenMessage("Warning: Hull breach!", 5.0f, ScreenMessageStyle.UPPER_CENTER);
+            }
+            if (takingOnWater)
+            {
+                ScreenMessages.PostScreenMessage("Warning: Taking on water!", 5.0f, ScreenMessageStyle.UPPER_CENTER);
+            }
+            if (isCritical)
+            {
+                ScreenMessages.PostScreenMessage("Warning: Critical damage!", 5.0f, ScreenMessageStyle.UPPER_CENTER);
             }
         }
 

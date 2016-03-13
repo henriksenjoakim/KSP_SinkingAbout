@@ -73,6 +73,7 @@ namespace sinkingabout
         public void Update()
         {
             tickHandler();
+
         }
     }
 }

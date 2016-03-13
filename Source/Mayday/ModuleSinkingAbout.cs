@@ -10,6 +10,9 @@ namespace sinkingabout
     public class ModuleSinkingAbout: PartModule
     {
         [KSPField(isPersistant = false)]
+        public bool isSuperstructure = false;
+
+        [KSPField(isPersistant = false)]
         public double flowRate = 1;
 
         [KSPField(isPersistant = false)]
@@ -29,17 +32,38 @@ namespace sinkingabout
         public bool isDoomed = false;
         public double previousAmount;     
         public int connectedParts;
-
+        public bool takingOnWater = false;
+        public bool sinkingAbout = false;
+        
         public AudioSource waterAudio;
         public AudioSource bubbleAudio;
 
+        /*
+        [UI_FloatRange(minValue = 1, maxValue = 100, stepIncrement = 1)]
+        [KSPField(guiActive = true, guiActiveEditor = true, guiFormat = "P0", isPersistant = true, guiName = "FlowMultiplier")]
+        public float flowMultiplier = 1;
 
-
+        [KSPEvent(active = true, guiActive = true, guiActiveEditor = true, externalToEVAOnly = false, guiActiveUnfocused = true, guiName = "Test HullBreach")]
+        public void hullbreach()
+        {
+            if (hasHullBreach)
+            {
+                hasHullBreach = false;
+                isDoomed = false;
+            }
+            else
+            {
+                hasHullBreach = true;
+                isDoomed = true;
+            }
+        }
+        */
 
         public void takeOnWater()
         {
+            if (!HighLogic.LoadedSceneIsFlight) return;
             //if (!this.part.WaterContact) return;
-            if (!hasHullBreach)
+            if (!sinkingAbout)
             {
                 if (waterAudio != null)
                 {
@@ -50,10 +74,11 @@ namespace sinkingabout
                 }
                 return;
             }
-            if (hasHullBreach)
+            if (sinkingAbout)
             {
                 if (this.part.submergedPortion == 1)
                 {
+                    takingOnWater = true;
                     if (waterAudio != null)
                     {
                         if (waterAudio.isPlaying)
@@ -84,6 +109,7 @@ namespace sinkingabout
                 }
                 else
                 {
+                    takingOnWater = false;
                     if (bubbleAudio != null)
                     {
                         if (bubbleAudio.isPlaying)
@@ -118,107 +144,130 @@ namespace sinkingabout
 
                 if (this.part.WaterContact)
                 {
-                    if (this.part.Resources["SeaWater"].amount < (this.part.submergedPortion * this.part.Resources["SeaWater"].maxAmount))
+                    if (isCritical)
                     {
-                        if (isCritical)
-                        {
-                            this.part.RequestResource("SeaWater", (0 - (critFlowRate * this.part.submergedPortion)));
-                        }
-                        else
-                        {
-                            this.part.RequestResource("SeaWater", (0 - (flowRate * this.part.submergedPortion)));
-                        }
+                        this.part.RequestResource("SeaWater", (0 - (critFlowRate * (0.1 + this.part.submergedPortion)/* * flowMultiplier*/)));
+                    }
+                    else
+                    {
+                        this.part.RequestResource("SeaWater", (0 - (flowRate * (0.1 + this.part.submergedPortion)/* * flowMultiplier*/)));
                     }
                 }
                 else
                 {
-                    if (this.part.Resources["SeaWater"].amount > (this.part.submergedPortion * this.part.Resources["SeaWater"].maxAmount))
+                    if (isCritical)
                     {
-                        if (isCritical)
-                        {
-                            this.part.RequestResource("SeaWater", (critFlowRate));
-                        }
-                        else
-                        {
-                            this.part.RequestResource("SeaWater", (flowRate));
-                        }
+                        this.part.RequestResource("SeaWater", (critFlowRate/* * flowMultiplier*/));
+                    }
+                    else
+                    {
+                        this.part.RequestResource("SeaWater", (flowRate/* * flowMultiplier*/));
                     }
                 }
             }
         }
 
+
         public void checkForHullBreach()
         {
-            if (this.part.temperature >= (this.part.maxTemp * breachTemp))
+            if (!HighLogic.LoadedSceneIsFlight) return;
+            if (isSuperstructure == true)
             {
-                hasHullBreach = true;
-            }   
-            else
-            {
-                if (isDoomed)
+                if (this.part.WaterContact)
                 {
-
+                    sinkingAbout = true;
+                    if (this.part.temperature >= (this.part.maxTemp * critBreachTemp))
+                    {
+                        isCritical = true;
+                    }
+                    else
+                    {
+                        isCritical = false;
+                    }
                 }
                 else
                 {
-                    hasHullBreach = false;
-                }
-            }
-
-            
-            if (this.part.temperature >= (this.part.maxTemp * critBreachTemp))
-            {
-                isCritical = true;
-            }
-            else
-            {
-                if (isDoomed)
-                {
-                
-                }
-                else
-                {
+                    sinkingAbout = false;
                     isCritical = false;
                 }
             }
+            else
+            {
+                if (this.part.temperature >= (this.part.maxTemp * breachTemp))
+                {
+                    hasHullBreach = true;
+                    sinkingAbout = true;
 
-            int partCount = 0;
-            if (this.part.parent != null)
-            {
-                if (this.part.parent.Modules.Contains("ModuleSinkingAbout"))
-                {
-                    partCount += 1;
                 }
-            }
-            if (this.part.children.Count > 0)
-            {
-                foreach (Part p in this.part.children)
+                else
                 {
-                    if (p.Modules.Contains("ModuleSinkingAbout"))
+                    if (isDoomed)
+                    {
+
+                    }
+                    else
+                    {
+                        hasHullBreach = false;
+                        sinkingAbout = false;
+                    }
+                }
+
+
+                if (this.part.temperature >= (this.part.maxTemp * critBreachTemp))
+                {
+                    isCritical = true;
+                }
+                else
+                {
+                    if (isDoomed)
+                    {
+
+                    }
+                    else
+                    {
+                        isCritical = false;
+                    }
+                }
+
+                int partCount = 0;
+                if (this.part.parent != null)
+                {
+                    if (this.part.parent.Modules.Contains("ModuleSinkingAbout"))
                     {
                         partCount += 1;
                     }
                 }
-            }
-            if (partCount < connectedParts && initialCheck)
-            {
-                hasHullBreach = true;
-                isCritical = true;
-                isDoomed = true;
-            }
-            if (!initialCheck)
-            {
-                initialCheck = true;
-            }
-            if (isDoomed)
-            {
+                if (this.part.children.Count > 0)
+                {
+                    foreach (Part p in this.part.children)
+                    {
+                        if (p.Modules.Contains("ModuleSinkingAbout"))
+                        {
+                            partCount += 1;
+                        }
+                    }
+                }
+                if (partCount < connectedParts && initialCheck)
+                {
+                    hasHullBreach = true;
+                    sinkingAbout = true;
+                    isCritical = true;
+                    isDoomed = true;
+                }
+                if (!initialCheck)
+                {
+                    initialCheck = true;
+                }
+                if (isDoomed)
+                {
 
+                }
+                else
+                {
+                    connectedParts = partCount;
+                }
+                partCount = 0;
             }
-            else
-            {
-                connectedParts = partCount;
-            } 
-            partCount = 0;
         }
 
         //Ticker
