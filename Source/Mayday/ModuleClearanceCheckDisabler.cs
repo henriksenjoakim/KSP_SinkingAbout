@@ -14,6 +14,7 @@ namespace sinkingabout
 
         private void checkForClearance()
         {
+            if (!HighLogic.LoadedSceneIsFlight) return;
             if (this.part.children.Count != 0)
             {
                 foreach (Part p in this.part.vessel.parts)

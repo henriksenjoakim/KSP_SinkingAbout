@@ -12,26 +12,27 @@ namespace sinkingabout
     {
         ConfigNode[] loadedGuidanceArray;
         private bool isRunning = false;
-        public bool defaultGuidanceActive;
-        public string defaultMissileType;
-        public string defaultHomingType;
-        public string defaultTargetingType;
-        public float defaultActiveRadarRange;
-        public float defaultMaxOffBoresight;
-        public float defaultLockedSensorFOV;
-        public float defaultMinStaticLaunchRange;
-        public float defaultMaxStaticLaunchRange;
-        public bool defaultRadarLOAL;
-        public float defaultHeatThreshold;
+        private string defaultShortName;
+        private bool defaultGuidanceActive;
+        private string defaultMissileType;
+        private string defaultHomingType;
+        private string defaultTargetingType;
+        private float defaultActiveRadarRange;
+        private float defaultMaxOffBoresight;
+        private float defaultLockedSensorFOV;
+        private float defaultMinStaticLaunchRange;
+        private float defaultMaxStaticLaunchRange;
+        private bool defaultRadarLOAL;
+        private float defaultHeatThreshold;
 
-        [KSPField(isPersistant = true)] 
-        public int selectedGuidanceID = 0;
+        [KSPField(isPersistant = true)]
+        private int selectedGuidanceID = 0;
 
-        [KSPField(isPersistant = true)] 
-        public int totalLoadedGuidance = 0;
+        [KSPField(isPersistant = true)]
+        private int totalLoadedGuidance = 0;
 
-        [KSPEvent(active = true, guiActive = false, guiActiveEditor = true, externalToEVAOnly = false, guiActiveUnfocused = false, guiName = "Next Guidance Sys")]
-        public void nextGuidance()
+        [KSPEvent(active = true, guiActive = false, guiActiveEditor = true, externalToEVAOnly = false, guiActiveUnfocused = false, guiName = "Next Guidance System")]
+        private void nextGuidance()
         {
             if (isRunning)
             {
@@ -52,10 +53,10 @@ namespace sinkingabout
             }
         }
 
-        [KSPField(guiActive = true, guiActiveEditor = true, isPersistant = true, guiName = "Guidance:")]
-        public String selectedGuidanceDisplay;
+        [KSPField(guiActive = true, guiActiveEditor = true, isPersistant = true, guiName = "Guidance")]
+        private String selectedGuidanceDisplay;
 
-        public void loadGuidance(int guidanceNumber)
+        private void loadGuidance(int guidanceNumber)
         {
             if (isRunning)
             {
@@ -65,10 +66,7 @@ namespace sinkingabout
                     {
                         var pp = this.part.Modules.OfType<MissileLauncher>().Single();
                         pp = this.part.FindModulesImplementing<MissileLauncher>().First();
-                        if (defaultGuidanceActive != null)
-                        {
-                            pp.guidanceActive = defaultGuidanceActive;
-                        }
+                        pp.guidanceActive = defaultGuidanceActive;
                         if (defaultMissileType != null)
                         {
                             pp.missileType = defaultMissileType;
@@ -81,34 +79,13 @@ namespace sinkingabout
                         {
                             pp.homingType = defaultHomingType;
                         }
-                        if (defaultActiveRadarRange != null)
-                        {
-                            pp.activeRadarRange = defaultActiveRadarRange;
-                        }
-                        if (defaultMaxOffBoresight != null)
-                        {
-                            pp.maxOffBoresight = defaultMaxOffBoresight;
-                        }
-                        if (defaultLockedSensorFOV != null)
-                        {
-                            pp.lockedSensorFOV = defaultLockedSensorFOV;
-                        }
-                        if (defaultMinStaticLaunchRange != null)
-                        {
-                            pp.minStaticLaunchRange = defaultMinStaticLaunchRange;
-                        }
-                        if (defaultMaxStaticLaunchRange != null)
-                        {
-                            pp.maxStaticLaunchRange = defaultMaxStaticLaunchRange;
-                        }
-                        if (defaultRadarLOAL != null)
-                        {
-                            pp.radarLOAL = defaultRadarLOAL;
-                        }
-                        if (defaultHeatThreshold != null)
-                        {
-                            pp.heatThreshold = defaultHeatThreshold;
-                        }
+                        pp.activeRadarRange = defaultActiveRadarRange;
+                        pp.maxOffBoresight = defaultMaxOffBoresight;
+                        pp.lockedSensorFOV = defaultLockedSensorFOV;
+                        pp.minStaticLaunchRange = defaultMinStaticLaunchRange;
+                        pp.maxStaticLaunchRange = defaultMaxStaticLaunchRange;
+                        pp.radarLOAL = defaultRadarLOAL;
+                        pp.heatThreshold = defaultHeatThreshold;
                         selectedGuidanceDisplay = "Default (" + pp.targetingType + ")";
                     }
                 }
@@ -201,35 +178,36 @@ namespace sinkingabout
                             }
                             pp.targetingType = loadedGuidanceArray[(guidanceNumber - 1)].GetValue("targetingType");
                         }
-                        if (loadedGuidanceArray[(guidanceNumber - 1)].HasValue("activeRadarRange"))
+                        //
+                        if (loadedGuidanceArray != null && loadedGuidanceArray[(guidanceNumber - 1)].HasValue("activeRadarRange"))
                         {
                             pp.activeRadarRange = Convert.ToSingle(loadedGuidanceArray[(guidanceNumber - 1)].GetValue("activeRadarRange"));
                         }
-                        if (loadedGuidanceArray[(guidanceNumber - 1)].HasValue("maxOffBoresight"))
+                        if (loadedGuidanceArray != null && loadedGuidanceArray[(guidanceNumber - 1)].HasValue("maxOffBoresight"))
                         {
                             pp.maxOffBoresight = Convert.ToSingle(loadedGuidanceArray[(guidanceNumber - 1)].GetValue("maxOffBoresight"));
                         }
-                        if (loadedGuidanceArray[(guidanceNumber - 1)].HasValue("lockedSensorFOV"))
+                        if (loadedGuidanceArray != null && loadedGuidanceArray[(guidanceNumber - 1)].HasValue("lockedSensorFOV"))
                         {
                             pp.lockedSensorFOV = Convert.ToSingle(loadedGuidanceArray[(guidanceNumber - 1)].GetValue("lockedSensorFOV"));
                         }
-                        if (loadedGuidanceArray[(guidanceNumber - 1)].HasValue("minStaticLaunchRange"))
+                        if (loadedGuidanceArray != null && loadedGuidanceArray[(guidanceNumber - 1)].HasValue("minStaticLaunchRange"))
                         {
                             pp.minStaticLaunchRange = Convert.ToSingle(loadedGuidanceArray[(guidanceNumber - 1)].GetValue("minStaticLaunchRange"));
                         }
-                        if (loadedGuidanceArray[(guidanceNumber - 1)].HasValue("maxStaticLaunchRange"))
+                        if (loadedGuidanceArray != null && loadedGuidanceArray[(guidanceNumber - 1)].HasValue("maxStaticLaunchRange"))
                         {
                             pp.maxStaticLaunchRange = Convert.ToSingle(loadedGuidanceArray[(guidanceNumber - 1)].GetValue("maxStaticLaunchRange"));
                         }
-                        if (loadedGuidanceArray[(guidanceNumber - 1)].HasValue("radarLOAL"))
+                        if (loadedGuidanceArray != null && loadedGuidanceArray[(guidanceNumber - 1)].HasValue("radarLOAL"))
                         {
                             pp.radarLOAL = Convert.ToBoolean(loadedGuidanceArray[(guidanceNumber - 1)].GetValue("radarLOAL"));
                         }
-                        if (loadedGuidanceArray[(guidanceNumber - 1)].HasValue("heatThreshold"))
+                        if (loadedGuidanceArray != null && loadedGuidanceArray[(guidanceNumber - 1)].HasValue("heatThreshold"))
                         {
                             pp.heatThreshold = Convert.ToSingle(loadedGuidanceArray[(guidanceNumber - 1)].GetValue("heatThreshold"));
                         }
-                        pp.GetSubLabel();
+                        //pp.GetSubLabel();
                         selectedGuidanceDisplay = loadedGuidanceArray[(guidanceNumber - 1)].GetValue("name") + " (" + pp.targetingType + ")";
                     }
                 }
@@ -237,75 +215,105 @@ namespace sinkingabout
         }
 
 
-        private void setUp()
+        private bool hasChanged = true;
+        public void Update()
         {
-            if (this.part.partInfo.partConfig.HasNode("GUIDANCE"))
+            if (!HighLogic.LoadedSceneIsFlight) return;
+            foreach (Part p in this.part.vessel.parts)
             {
-                if (this.part.Modules.Contains("MissileLauncher"))
+                if (p.Modules.Contains("MissileFire"))
                 {
-                    var pp = this.part.Modules.OfType<MissileLauncher>().Single();
-                    pp = this.part.FindModulesImplementing<MissileLauncher>().First();
-                    if (pp.guidanceActive != null)
+                    var pp = p.Modules.OfType<MissileFire>().Single();
+                    pp = p.FindModulesImplementing<MissileFire>().First();
+                    if (pp.isArmed)
                     {
-                        defaultGuidanceActive = pp.guidanceActive;
-                    }
-                    if (pp.missileType != null)
-                    {
-                        defaultMissileType = pp.missileType;
-                    }
-                    if (pp.targetingType != null)
-                    {
-                        defaultTargetingType = pp.targetingType;
-                    }
-                    if (pp.homingType != null)
-                    {
-                        defaultHomingType = pp.homingType;
-                    }
-                    if (pp.activeRadarRange != null)
-                    {
-                        defaultActiveRadarRange = pp.activeRadarRange;
-                    }
-                    if (pp.maxOffBoresight != null)
-                    {
-                        defaultMaxOffBoresight = pp.maxOffBoresight;
-                    }
-                    if (pp.lockedSensorFOV != null)
-                    {
-                        defaultLockedSensorFOV = pp.lockedSensorFOV;
-                    }
-                    if (pp.minStaticLaunchRange != null)
-                    {
-                        defaultMinStaticLaunchRange = pp.minStaticLaunchRange;
-                    }
-                    if (pp.maxStaticLaunchRange != null)
-                    {
-                        defaultMaxStaticLaunchRange = pp.maxStaticLaunchRange;
-                    }
-                    if (pp.radarLOAL != null)
-                    {
-                        defaultRadarLOAL = pp.radarLOAL;
-                    }
-                    if (pp.heatThreshold != null)
-                    {
-                        defaultHeatThreshold = pp.heatThreshold;
-                    }
-                    loadedGuidanceArray = this.part.partInfo.partConfig.GetNodes("GUIDANCE");
-                    if (loadedGuidanceArray.Length > 0)
-                    {
-                        totalLoadedGuidance = loadedGuidanceArray.Length;
-                        isRunning = true;
-                        if (selectedGuidanceID > totalLoadedGuidance)
+                        if (pp.selectedWeapon != null && pp.selectedWeapon.GetPart() == this.part)
                         {
-                            selectedGuidanceID = 0;
-                            loadGuidance(0);
+                            if (hasChanged == true)
+                            {
+                                foreach (Part ppp in this.part.vessel.parts)
+                                {
+                                    if (ppp.Modules.Contains("ModuleGuidanceSwitcher"))
+                                    {
+                                        if (pp.selectedWeapon.GetPart() == ppp)
+                                        {
+                                            var pppp = ppp.Modules.OfType<ModuleGuidanceSwitcher>().Single();
+                                            pppp = ppp.FindModulesImplementing<ModuleGuidanceSwitcher>().First();
+                                            ScreenMessages.PostScreenMessage("Guidance: " + pppp.selectedGuidanceDisplay, 5.0f, ScreenMessageStyle.UPPER_CENTER);
+                                            hasChanged = false;
+                                        }
+                                    }
+                                }
+                            }
                         }
                         else
                         {
-                            loadGuidance(selectedGuidanceID);
+                            hasChanged = true;
+                        }
+                    }
+
+                }
+            }
+        }
+
+
+        private void setUp()
+        {
+            UrlDir.UrlConfig[] cfg = GameDatabase.Instance.GetConfigs("PART");
+            foreach (UrlDir.UrlConfig cn in cfg)
+            {
+                if (cn.name == this.part.partInfo.name)
+                {
+                    if (cn.config.HasNode("GUIDANCE"))
+                    {
+                        if (this.part.Modules.Contains("MissileLauncher"))
+                        {
+                            var pp = this.part.Modules.OfType<MissileLauncher>().Single();
+                            pp = this.part.FindModulesImplementing<MissileLauncher>().First();
+                            defaultGuidanceActive = pp.guidanceActive;
+                            if (pp.missileType != null)
+                            {
+                                defaultMissileType = pp.missileType;
+                            }
+                            if (pp.targetingType != null)
+                            {
+                                defaultTargetingType = pp.targetingType;
+                            }
+                            if (pp.homingType != null)
+                            {
+                                defaultHomingType = pp.homingType;
+                            }
+                            defaultActiveRadarRange = pp.activeRadarRange;
+                            defaultMaxOffBoresight = pp.maxOffBoresight;
+                            defaultLockedSensorFOV = pp.lockedSensorFOV;
+                            defaultMinStaticLaunchRange = pp.minStaticLaunchRange;
+                            defaultMaxStaticLaunchRange = pp.maxStaticLaunchRange;
+                            defaultRadarLOAL = pp.radarLOAL;
+                            defaultHeatThreshold = pp.heatThreshold;
+                            loadedGuidanceArray = cn.config.GetNodes("GUIDANCE");
+                            if (loadedGuidanceArray.Length != 0)
+                            {
+                                totalLoadedGuidance = loadedGuidanceArray.Length;
+                                isRunning = true;
+                                if (selectedGuidanceID > totalLoadedGuidance)
+                                {
+                                    selectedGuidanceID = 0;
+                                    loadGuidance(0);
+                                }
+                                else
+                                {
+                                    loadGuidance(selectedGuidanceID);
+                                }
+                            }
                         }
                     }
                 }
             }
+            /*
+            if (this.part.partInfo != null && this.part.partInfo.partConfig != null)
+            {
+
+            }*/
         }
 
         public override void OnStart(PartModule.StartState state)

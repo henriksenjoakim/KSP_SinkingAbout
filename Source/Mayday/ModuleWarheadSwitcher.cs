@@ -51,7 +51,7 @@ namespace sinkingabout
         private void loadWarhead(int warheadNumber)
         {
             if (isRunning)
-            {
+            {               
                 if (warheadNumber == 0)
                 {
                     if (this.part.Modules.Contains("MissileLauncher"))
@@ -63,7 +63,7 @@ namespace sinkingabout
                         pp.blastHeat = defaultBlastHeat;
                         //pp.shortName = defaultShortName;
                         selectedWarheadDisplay = "Default";
-
+                       
                     }
                 }
                 else
@@ -91,6 +91,46 @@ namespace sinkingabout
             }
         }
 
+        private bool hasChanged = true;
+        public void Update()
+        {
+            if (!HighLogic.LoadedSceneIsFlight) return;
+            foreach (Part p in this.part.vessel.parts)
+            {
+                if (p.Modules.Contains("MissileFire"))
+                {
+                    var pp = p.Modules.OfType<MissileFire>().Single();
+                    pp = p.FindModulesImplementing<MissileFire>().First();
+                    if (pp.isArmed)
+                    {
+                        if (pp.selectedWeapon != null && pp.selectedWeapon.GetPart() == this.part)
+                        {
+                            if (hasChanged == true)
+                            {
+                                foreach (Part ppp in this.part.vessel.parts)
+                                {
+                                    if (ppp.Modules.Contains("ModuleWarheadSwitcher"))
+                                    {
+                                        if (pp.selectedWeapon.GetPart() == ppp)
+                                        {
+                                            var pppp = ppp.Modules.OfType<ModuleWarheadSwitcher>().Single();
+                                            pppp = ppp.FindModulesImplementing<ModuleWarheadSwitcher>().First();
+                                            ScreenMessages.PostScreenMessage("Warhead: " + pppp.selectedWarheadDisplay, 5.0f, ScreenMessageStyle.UPPER_CENTER);
+                                            hasChanged = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            hasChanged = true;
+                        }
+                    }
+
+                }
+            }
+        }
 
         private void setUp()
         {
@@ -132,6 +172,12 @@ namespace sinkingabout
                     }
                 }
             }
+            /*
+            if (this.part.partInfo != null && this.part.partInfo.partConfig != null)
+            {
+ 
+            }*/
+
             /*
             if (this.part.partInfo != null && this.part.partInfo.partConfig != null)
             {
