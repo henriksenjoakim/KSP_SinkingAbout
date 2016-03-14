@@ -9,8 +9,17 @@ namespace sinkingabout
 {
     public class ModuleSinkingAbout: PartModule
     {
-        [KSPField(isPersistant = false)]
-        public bool isSuperstructure = false;
+        [KSPField(guiActive = true, guiActiveEditor = true, isPersistant = true, guiName = "SA: Sponge")]
+        public bool sponge = false;
+
+        [KSPField(guiActive = true, guiActiveEditor = true, isPersistant = true, guiName = "SA: Sinks if damaged")]
+        public bool damageable = false;
+
+        [KSPField(guiActive = true, guiActiveEditor = true, isPersistant = true, guiName = "SA: Explodes under water")]
+        public bool hydroExplosive = false;
+
+        [KSPField(guiActive = true, guiActiveEditor = true, isPersistant = true, guiName = "SA: Hull part")]
+        public bool hull = false;
 
         [KSPField(isPersistant = false)]
         public double flowRate = 1;
@@ -59,6 +68,30 @@ namespace sinkingabout
         }
         */
 
+        private float hydroExoplosiveTimerCurrent = 0f;
+        private float hydroExplosiveTimerTotal = 30f;
+        public void hydroExplosiveness()
+        {
+            if (!hydroExplosive) return;
+            if (!this.part.WaterContact) return;
+            if (hydroExplosive)
+            {
+                if (this.part.WaterContact && this.part.submergedPortion == 1)
+                {
+                    hydroExoplosiveTimerCurrent += Time.deltaTime;
+                    if (hydroExoplosiveTimerCurrent >= hydroExplosiveTimerTotal)
+                    {
+                        hydroExoplosiveTimerCurrent -= hydroExplosiveTimerTotal;
+                        this.part.explode();
+                    }
+                }
+                else
+                {
+                    hydroExoplosiveTimerCurrent = 0f;
+                }
+            }
+        }
+
         public void takeOnWater()
         {
             if (!HighLogic.LoadedSceneIsFlight) return;
@@ -76,9 +109,10 @@ namespace sinkingabout
             }
             if (sinkingAbout)
             {
+                takingOnWater = true;
                 if (this.part.submergedPortion == 1)
                 {
-                    takingOnWater = true;
+                    hydroExplosiveness();
                     if (waterAudio != null)
                     {
                         if (waterAudio.isPlaying)
@@ -109,7 +143,6 @@ namespace sinkingabout
                 }
                 else
                 {
-                    takingOnWater = false;
                     if (bubbleAudio != null)
                     {
                         if (bubbleAudio.isPlaying)
@@ -165,33 +198,33 @@ namespace sinkingabout
                     }
                 }
             }
+            else
+            {
+                takingOnWater = false;
+            }
         }
 
 
-        public void checkForHullBreach()
+        public void checkConditions()
         {
             if (!HighLogic.LoadedSceneIsFlight) return;
-            if (isSuperstructure == true)
+
+            if (sponge)
             {
                 if (this.part.WaterContact)
                 {
                     sinkingAbout = true;
-                    if (this.part.temperature >= (this.part.maxTemp * critBreachTemp))
-                    {
-                        isCritical = true;
-                    }
-                    else
-                    {
-                        isCritical = false;
-                    }
                 }
                 else
                 {
-                    sinkingAbout = false;
-                    isCritical = false;
+                    if (!isDoomed)
+                    {
+                        sinkingAbout = false;
+                    }
                 }
             }
-            else
+
+            if (damageable)
             {
                 if (this.part.temperature >= (this.part.maxTemp * breachTemp))
                 {
@@ -201,72 +234,63 @@ namespace sinkingabout
                 }
                 else
                 {
-                    if (isDoomed)
-                    {
-
-                    }
-                    else
+                    if (!isDoomed)
                     {
                         hasHullBreach = false;
                         sinkingAbout = false;
                     }
                 }
-
-
                 if (this.part.temperature >= (this.part.maxTemp * critBreachTemp))
                 {
                     isCritical = true;
                 }
                 else
                 {
-                    if (isDoomed)
-                    {
-
-                    }
-                    else
+                    if (!isDoomed)
                     {
                         isCritical = false;
                     }
                 }
 
-                int partCount = 0;
-                if (this.part.parent != null)
+
+                if (hull)
                 {
-                    if (this.part.parent.Modules.Contains("ModuleSinkingAbout"))
+                    int partCount = 0;
+                    if (this.part.parent != null)
                     {
-                        partCount += 1;
-                    }
-                }
-                if (this.part.children.Count > 0)
-                {
-                    foreach (Part p in this.part.children)
-                    {
-                        if (p.Modules.Contains("ModuleSinkingAbout"))
+                        if (this.part.parent.Modules.Contains("ModuleSinkingAbout"))
                         {
                             partCount += 1;
                         }
                     }
+                    if (this.part.children.Count > 0)
+                    {
+                        foreach (Part p in this.part.children)
+                        {
+                            if (p.Modules.Contains("ModuleSinkingAbout"))
+                            {
+                                partCount += 1;
+                            }
+                        }
+                    }
+                    if (partCount < connectedParts && initialCheck)
+                    {
+                        hasHullBreach = true;
+                        sinkingAbout = true;
+                        isCritical = true;
+                        isDoomed = true;
+                    }
+                    if (!initialCheck)
+                    {
+                        initialCheck = true;
+                    }
+                    if (!isDoomed)
+                    {
+                        connectedParts = partCount;
+                    }
+                    partCount = 0;
                 }
-                if (partCount < connectedParts && initialCheck)
-                {
-                    hasHullBreach = true;
-                    sinkingAbout = true;
-                    isCritical = true;
-                    isDoomed = true;
-                }
-                if (!initialCheck)
-                {
-                    initialCheck = true;
-                }
-                if (isDoomed)
-                {
 
-                }
-                else
-                {
-                    connectedParts = partCount;
-                }
-                partCount = 0;
             }
         }
 
@@ -279,7 +303,7 @@ namespace sinkingabout
             if (timerCurrent >= timerTotal)
             {
                 timerCurrent -= timerTotal;
-                checkForHullBreach();
+                checkConditions();
             }
         }
 

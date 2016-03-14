@@ -140,6 +140,7 @@ namespace sinkingabout
             commandModules = 0;
             criticalBreach = 0;
             armedModules = 0;
+            activeFlow = 0;
         }
 
         public void clearAudioHandler()
