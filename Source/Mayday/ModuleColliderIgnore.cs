@@ -17,7 +17,7 @@ namespace sinkingabout
         private Light fireLightLauncher;
         private GameObject glowFx;
 
-        [KSPField(guiActive = true, guiActiveEditor = true, isPersistant = true, guiName = "IsTubeloaded")]
+        [KSPField(guiActive = true, guiActiveEditor = true, isPersistant = false, guiName = "IsTubeloaded")]
         private bool isTubeLoaded = false;
 
         private Color lightColorYellow = new Color(240, 184, 49);

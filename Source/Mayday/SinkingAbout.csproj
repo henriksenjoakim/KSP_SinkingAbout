@@ -52,6 +52,7 @@
     <Compile Include="ModuleBoatLoad.cs" />
     <Compile Include="ModuleClearanceCheckDisabler.cs" />
     <Compile Include="ModuleColliderIgnore.cs" />
+    <Compile Include="ModuleExplosiveStorage.cs" />
     <Compile Include="ModuleGuidanceSwitcher.cs" />
     <Compile Include="ModuleShipAlarm.cs" />
     <Compile Include="ModuleShipAlarmModule.cs" />

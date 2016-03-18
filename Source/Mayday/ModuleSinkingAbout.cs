@@ -108,8 +108,7 @@ namespace sinkingabout
                 return;
             }
             if (sinkingAbout)
-            {
-                takingOnWater = true;
+            {                
                 if (this.part.submergedPortion == 1)
                 {
                     hydroExplosiveness();
@@ -177,6 +176,7 @@ namespace sinkingabout
 
                 if (this.part.WaterContact)
                 {
+                    takingOnWater = true;
                     if (isCritical)
                     {
                         this.part.RequestResource("SeaWater", (0 - (critFlowRate * (0.1 + this.part.submergedPortion)/* * flowMultiplier*/)));
@@ -196,6 +196,7 @@ namespace sinkingabout
                     {
                         this.part.RequestResource("SeaWater", (flowRate/* * flowMultiplier*/));
                     }
+                    takingOnWater = false;
                 }
             }
             else

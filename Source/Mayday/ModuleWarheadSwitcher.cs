@@ -127,7 +127,6 @@ namespace sinkingabout
                             hasChanged = true;
                         }
                     }
-
                 }
             }
         }
